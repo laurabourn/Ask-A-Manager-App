@@ -1,0 +1,1118 @@
+---
+title: "Ask a Manager Cleanup"
+author: "The Girls: Group 3"
+date: "2021-07-29"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE, warning=FALSE, message=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(Hmisc)
+
+# Load the data
+
+aam <- read.csv(file = 'survey.csv')
+
+```
+
+
+#### Clean up the column names
+#### Remove not needed columns
+
+```{r Clean up}
+
+# Clean up the column names: Shorten them
+
+colnames(aam)[2] <- "age"
+colnames(aam)[6] <- "salary"
+colnames(aam)[7] <- "oth_comp"
+colnames(aam)[14] <- "prof_exp"
+colnames(aam)[15] <- "field_exp"
+colnames(aam)[16] <- "education"
+
+# Remove not needed columns
+
+aam = subset(aam, select = -c(timestamp, additional_context_on_job_title, additional_context_on_income) )
+
+# Replace missing compensation fields with 0
+
+aam$salary[is.na(aam$salary)] <- 0
+aam$oth_comp[is.na(aam$oth_comp)] <- 0
+
+# Remove rows with salary and oth_comp both 0
+
+aam <- aam %>% filter(!(salary == 0 & oth_comp == 0))
+
+```
+
+#### Clean up the country names
+ 
+```{r Clean up the country names}
+
+# Make all country values lowercase
+
+aam$country = tolower(aam$country)
+
+# Clean up the country name: india
+
+aam$country[aam$city %in% c("India")] <- "india"
+
+# Clean up the country name: US
+
+#aam$country[grepl("us\\s", aam$country)] <- "usa"
+#aam$country[grepl("usa\\s", aam$country)] <- "usa"
+
+aam$country[aam$country %in% c("united states", "us", "u.s.", "united states of america", "u.s>", "isa", "united state", "u.s.a", "u.s.a.", "america", "the united states", "united state of america", "united stated", "united statws", "u.s", "unites states", "u. s.", "united sates", "united states of american", "uniited states", "united sates of america", "united states (i work from home and my clients are all over the us/canada/pr", "unted states", "united statesp", "united stattes", "united statea", "united statees", "uniyed states", "uniyes states", "united states of americas", "us of a", "u.sa", "united status", "uniteed states", "united stares", "unite states", "the us", "unitedstates", "united statues", "untied states", "usa (company is based in a us territory, i work remote)", "unitied states", "united sttes", "uniter statez", "u. s", "usa tomorrow", "united stateds", "unitef stated", "we don't get raises, we get quarterly bonuses, but they periodically asses income in the area you work, so i got a raise because a 3rd party assessment showed i was paid too little for the area we were located", "usaa", "united states- puerto rico", "usd", "usa, but for foreign gov't", "united statss", "united  states", "usa-- virgin islands", "united statew", "usat", "ua", "i work for a uae-based organization, though i am personally in the us.", "united y", "california", "japan, us gov position","for the united states government, but posted overseas", "y", "from romania, but for an us based company", "work for a uae-based organization, though i am personally in the us.", "work for an us based company but i'm from argentina.", "san francisco", "usab", "us govt employee overseas, country withheld", "virginia", "worldwide (based in us but short term trips aroudn the world)", "hartford", "i earn commission on sales. if i meet quota, i'm guaranteed another 16k min. last year i earned an additional 27k. it's not uncommon for people in my space to earn 100k+ after commission.", "i was brought in on this salary to help with the ehr and very quickly was promoted to current position but compensation was not altered.", "$2,175.84/year is deducted for benefits", "currently finance", "contracts", "ðÿ‡ºðÿ‡¸", "uxz", "uss", "is", "i.s.", "international", "remote (philippines)", "u.a.", "remote", "bonus based on meeting yearly goals set w/ my supervisor")] <- "usa"
+
+
+# Clean up the country name: UK
+
+aam$country[aam$country %in% c("united kingdom", "england", "great britain", "england/uk", "england, uk.", "britain", "united kingdom (england)", "united kingdom.", "u.k.", "united kindom", "england, uk", "uk for u.s. company", "united kingdomk", "england, gb", "u.k. (northern england)", "u.k", "england, united kingdom", "englang", "uk (england)", "uk, remote", "unites kingdom", "uk, but for globally fully remote company", "northern ireland, united kingdom", "northern ireland", "scotland, uk", "scotland", "uk (northern ireland)", "wales","wales, uk", "wales (united kingdom)", "wales (uk)", "n/a (remote from wherever i want)")] <- "uk"
+
+# Clean up the country name: canada
+
+aam$country[aam$country %in% c("canada, ottawa, ontario", "canadw", "can", "i am located in canada but i work for a company in the us", "canda", "canada and usa", "csnada", "canad", "canada", "global")] <- "canada"
+aam$country <- ifelse(grepl('Regina', aam$city), 'canada', aam$country)
+
+# Clean up the country name: australia
+
+aam$country[aam$country %in% c("australi", "australian")] <- "australia"
+
+# Clean up the country name: italy
+
+aam$country[aam$country %in% c("italy (south)")] <- "italy"
+
+# Clean up the country name: new zealand
+
+aam$country[aam$country %in% c("new zealand aotearoa", "nz", "from new zealand but on projects across apac")] <- "new zealand"
+
+# Clean up the country name: netherlands
+
+aam$country[aam$country %in% c("nederland", "the netherlands", "nl")] <- "netherlands"
+
+# Clean up the country name: brazil
+
+aam$country[aam$country %in% c("brasil")] <- "brazil"
+
+# Clean up the country name: argentina
+
+aam$country[aam$country %in% c("i work for an us based company but i'm from argentina.", "argentina but my org is in thailand")] <- "argentina"
+
+# Clean up the country name: austria 
+
+aam$country[aam$country %in% c("austria, but i work remotely for a dutch/british company")] <- "austria"
+
+# Clean up the country name: czech republic
+
+aam$country[aam$country %in% c("czechia", "europe")] <- "czech republic"
+
+# Clean up the country name: luxembourg
+
+aam$country[aam$country %in% c("luxemburg")] <- "luxembourg"
+
+# Clean up the country name: china
+
+aam$country[aam$country %in% c("mainland china")] <- "china"
+
+# Clean up the country name: denmark
+
+aam$country[aam$country %in% c("danmark")] <- "denmark"
+
+# Clean up the country name: mexico
+
+aam$country[aam$country %in% c("mã©xico")] <- "mexico"
+
+# Clean up the country name: UAE
+
+aam$country[aam$country %in% c("uae")] <- "united arab emirates"
+
+# Add USA indicator column
+
+aam$usa <- "USA"
+aam$usa[aam$country != "usa"] <- "Not USA"
+
+```
+
+#### Clean US States
+
+```{r Clean US States}
+
+# Clean US States
+# Survey allowed multiple choices: I picked one
+
+aam$state[aam$country != "usa"] <- " "
+
+aam$state <- ifelse(aam$country == 'usa' & is.na(aam$state) & is.na(aam$city), 'New York', aam$state)
+
+# Remove multiple state selections: Choose one state
+
+aam$state <- ifelse(grepl('Wyoming', aam$state), 'Wyoming', aam$state)
+aam$state <- ifelse(grepl('South Dakota', aam$state), 'South Dakota', aam$state)
+aam$state <- ifelse(grepl('Hawaii', aam$state), 'Hawaii', aam$state)
+aam$state <- ifelse(grepl('West Virginia', aam$state), 'West Virginia', aam$state)
+aam$state <- ifelse(grepl('Alaska', aam$state), 'Alaska', aam$state)
+aam$state <- ifelse(grepl('North Dakota', aam$state), 'North Dakota', aam$state)
+aam$state <- ifelse(grepl('Montana', aam$state), 'Montana', aam$state)
+aam$state <- ifelse(grepl('Rhode Island', aam$state), 'Rhode Island', aam$state)
+aam$state <- ifelse(grepl('Mississippi', aam$state), 'Mississippi', aam$state)
+aam$state <- ifelse(grepl('Alabama', aam$state), 'Alabama', aam$state)
+aam$state <- ifelse(grepl('Nebraska', aam$state), 'Nebraska', aam$state)
+aam$state <- ifelse(grepl('Arkansas', aam$state), 'Arkansas', aam$state)
+aam$state <- ifelse(grepl('Idaho', aam$state), 'Idaho', aam$state)
+aam$state <- ifelse(grepl('Louisiana', aam$state), 'Louisiana', aam$state)
+aam$state <- ifelse(grepl('Delaware',  aam$state), 'Delaware', aam$state)
+aam$state <- ifelse(grepl('North Carolina', aam$state), 'North Carolina', aam$state)
+aam$state <- ifelse(grepl('South Carolina', aam$state), 'South Carolina', aam$state)
+aam$state <- ifelse(grepl('Kentucky', aam$state), 'Kentucky', aam$state)
+aam$state <- ifelse(grepl('Georgia', aam$state), 'Georgia', aam$state)
+aam$state <- ifelse(grepl('Colorado', aam$state), 'Colorado', aam$state)
+aam$state <- ifelse(grepl('New Mexico', aam$state), 'New Mexico', aam$state)
+aam$state <- ifelse(grepl('Oklahoma', aam$state), 'Oklahoma', aam$state)
+aam$state <- ifelse(grepl('Utah', aam$state), 'Utah', aam$state)
+aam$state <- ifelse(grepl('Vermont', aam$state), 'Vermont', aam$state)
+aam$state <- ifelse(grepl('New Hampshire', aam$state), 'New Hampshire', aam$state)
+aam$state <- ifelse(grepl('Nevada', aam$state), 'Nevada', aam$state)
+aam$state <- ifelse(grepl('New Jersey',  aam$state), 'New Jersey', aam$state)
+aam$state <- ifelse(grepl('Oregon', aam$state), 'Oregon', aam$state)
+aam$state <- ifelse(grepl('Ohio', aam$state), 'Ohio', aam$state)
+aam$state <- ifelse(grepl('Arizona', aam$state), 'Arizona', aam$state)
+aam$state <- ifelse(grepl('Pennsylvania', aam$state), 'Pennsylvania', aam$state)
+aam$state <- ifelse(grepl('Texas', aam$state), 'Texas', aam$state)
+aam$state <- ifelse(grepl('Wisconsin', aam$state), 'Wisconsin', aam$state)
+aam$state <- ifelse(grepl('Kansas', aam$state), 'Kansas', aam$state)
+aam$state <- ifelse(grepl('Maryland', aam$state), 'Maryland', aam$state)
+aam$state <- ifelse(grepl('Indiana', aam$state), 'Indiana', aam$state)
+aam$state <- ifelse(grepl('Illinois', aam$state), 'Illinois', aam$state)
+aam$state <- ifelse(grepl('California', aam$state), 'California', aam$state)
+aam$state <- ifelse(grepl('District of Columbia', aam$state), 'District of Columbia', aam$state)
+
+# Clean US States using City
+
+aam$state <- ifelse(grepl('Cambridge, MA', aam$city), 'Massachusetts', aam$state)
+aam$state <- ifelse(grepl('Boston, MA', aam$city), 'Massachusetts', aam$state)
+aam$state <- ifelse(grepl('Boston', aam$city), 'Massachusetts', aam$state)
+aam$state <- ifelse(grepl('Springfield', aam$city) & is.na(aam$state), 'Illinois', aam$state)
+aam$state <- ifelse(grepl('Chicago', aam$city), 'Illinois', aam$state)
+aam$state <- ifelse(grepl('Prefer not to disclose', aam$city) & is.na(aam$state), 'Arkansas', aam$state)
+aam$state <- ifelse(grepl('East Coast USA' ,  aam$city) & is.na(aam$state), 'Maine', aam$state)
+aam$state <- ifelse(grepl('Boulder', aam$city) & is.na(aam$state), 'Colorado', aam$state)
+aam$state <- ifelse(grepl('Denver', aam$city) & is.na(aam$state), 'Colorado', aam$state)
+aam$state <- ifelse(grepl('based out of CA', aam$city) & is.na(aam$state), 'California', aam$state)
+
+aam$state <- ifelse(grepl('Massachusetts', aam$city), 'Massachusetts', aam$state)
+aam$state <- ifelse(grepl('Atlanta', aam$city), 'Georgia', aam$state)
+aam$state <- ifelse(grepl('AtlantA', aam$city), 'Georgia', aam$state)
+aam$state <- ifelse(grepl('Philadelphia', aam$city) & is.na(aam$state), 'Pennsylvania', aam$state)
+aam$state <- ifelse(grepl('Indianapolis', aam$city) , 'Indiana', aam$state)
+aam$state <- ifelse(grepl('New York', aam$city), 'New York', aam$state)
+aam$state <- ifelse(grepl('DC Metro Area', aam$city), 'Virginia', aam$state)
+aam$state <- ifelse(grepl('Washington DC', aam$city), 'District of Columbia', aam$state)
+aam$state <- ifelse(grepl('Washington, DC', aam$city), 'District of Columbia', aam$state)
+aam$state <- ifelse(grepl('District of Columbia', aam$city), 'District of Columbia', aam$state)
+
+aam$state <- ifelse(grepl('Washington, D.C.', aam$city), 'District of Columbia', aam$state)
+aam$state <- ifelse(grepl('Charlotte', aam$city), 'North Carolina', aam$state)
+aam$state <- ifelse(grepl('Portland', aam$city) & is.na(aam$state), 'Oregon', aam$state)
+aam$state <- ifelse(grepl('Birmingham', aam$city), 'Alabama', aam$state)
+aam$state <- ifelse(grepl('Philadelphia', aam$city), 'Pennsylvania', aam$state)
+aam$state <- ifelse(grepl('Omaha, NE', aam$city), 'Nebraska', aam$state)
+aam$state <- ifelse(grepl('Orlando', aam$city), 'Florida', aam$state)
+aam$state <- ifelse(grepl('Nyc', aam$city), 'New York', aam$state)
+aam$state <- ifelse(grepl('Florida', aam$city), 'Florida', aam$state)
+
+aam$state <- ifelse(grepl('San Diego', aam$city), 'California', aam$state)
+aam$state <- ifelse(grepl('Pittsburgh', aam$city), 'Pennsylvania', aam$state)
+aam$state <- ifelse(grepl('Sunnyvale', aam$city), 'California', aam$state)
+aam$state <- ifelse(grepl('Bemidji', aam$city), 'Minnesota', aam$state)
+aam$state <- ifelse(grepl('Le Center', aam$city), 'Minnesota', aam$state)
+aam$state <- ifelse(grepl('Minneapolis', aam$city), 'Minnesota', aam$state)
+aam$state <- ifelse(grepl('Ann Arbor area', aam$city), 'Michigan', aam$state)
+aam$state <- ifelse(grepl('Detroit', aam$city), 'Michigan', aam$state)
+aam$state <- ifelse(grepl('Temperance', aam$city), 'Michigan', aam$state)
+aam$state <- ifelse(grepl('Decline to answer', aam$city) & is.na(aam$state), 'Nebraska', aam$state)
+
+aam$state <- ifelse(grepl('No', aam$city), 'Louisiana', aam$state)
+aam$state <- ifelse(grepl('Sacramento',  aam$city), 'California', aam$state)
+aam$state <- ifelse(grepl('Redwood City, CA', aam$city), 'California', aam$state)
+aam$state <- ifelse(grepl('San Francisco', aam$city), 'California', aam$state)
+aam$state <- ifelse(grepl('Los Angeles', aam$city), 'California', aam$state)
+aam$state <- ifelse(grepl('Redding', aam$city), 'Pennsylvania', aam$state)
+aam$state <- ifelse(grepl('Walnut Creek, California', aam$city), 'California', aam$state)
+aam$state <- ifelse(grepl('NYC', aam$city), 'New York', aam$state)
+aam$state <- ifelse(grepl('Clifton Park', aam$city), 'New York', aam$state)
+aam$state <- ifelse(grepl('Albany, NY', aam$city), 'New York', aam$state)
+
+aam$state <- ifelse(grepl('Ithaca ny', aam$city), 'New York', aam$state)
+aam$state <- ifelse(grepl('Suburb city in Metro NY area', aam$city), 'New York', aam$state)
+aam$state <- ifelse(grepl('WA', aam$city), 'Washington', aam$state)
+aam$state <- ifelse(grepl('Seattle', aam$city), 'Washington', aam$state)
+aam$state <- ifelse(grepl('New Jersey',  aam$city), 'New Jersey', aam$state)
+aam$state <- ifelse(grepl('Jersey City, NJ', aam$city), 'New Jersey', aam$state)
+aam$state <- ifelse(grepl('Ambler', aam$city), 'Pennsylvania', aam$state)
+aam$state <- ifelse(grepl('Virginia Beach', aam$city), 'Virginia', aam$state)
+aam$state <- ifelse(grepl('arlington, va', aam$city), 'Virginia', aam$state)
+aam$state <- ifelse(grepl('various', aam$city) & is.na(aam$state), 'Wyoming', aam$state)
+
+aam$state <- ifelse(grepl('MCOL New England', aam$city), 'Connecticut', aam$state)
+aam$state <- ifelse(grepl('Hartford', aam$city), 'Connecticut', aam$state)
+aam$state <- ifelse(grepl('Prefer not to answer', aam$city) & is.na(aam$state), 'North Dakota', aam$state)
+aam$state <- ifelse(grepl('Remote', aam$city) & is.na(aam$state), 'South Dakota', aam$state)
+aam$state <- ifelse(grepl('Midwest area', aam$city) & is.na(aam$state), 'Nebraska', aam$state)
+aam$state <- ifelse(grepl('Decline to provide',  aam$city) & is.na(aam$state), 'Mississippi', aam$state)
+aam$state <- ifelse(grepl('n/a', aam$city) & is.na(aam$state), 'New Hampshire', aam$state)
+aam$state <- ifelse(grepl('Remote US', aam$city) & is.na(aam$state), 'Arkansas', aam$state)
+aam$state <- ifelse(grepl('Remote employee pre-pandemic', aam$city) & is.na(aam$state), 'North Dakota', aam$state)
+aam$state <- ifelse(grepl('Prefer not to answer', aam$city) & is.na(aam$state), 'Arkansas', aam$state)
+
+aam$state <- ifelse(grepl('Fully Remote - customers around the country', aam$city), 'New Mexico', aam$state)
+aam$state <- ifelse(grepl('Prefer not to say', aam$city) & is.na(aam$state), 'North  Dakota', aam$state)
+aam$state <- ifelse(grepl('prefer not to say', aam$city) & is.na(aam$state), 'North  Dakota', aam$state)
+aam$state <- ifelse(grepl('confidential', aam$city), 'Vermont', aam$state)
+aam$state <- ifelse(grepl('Okinawa', aam$city), 'Hawaii', aam$state)
+aam$state <- ifelse(grepl('This would narrow things down too much, sorry!', aam$city), 'Idaho', aam$state)
+aam$state <- ifelse(grepl('N/A', aam$city) & is.na(aam$state), 'New Hampshire', aam$state)
+aam$state <- ifelse(grepl('Na', aam$city) & is.na(aam$state), 'Vermont', aam$state)
+aam$state <- ifelse(grepl('(Anonymous)', aam$city), 'Nevada', aam$state)
+aam$state <- ifelse(grepl('Several', aam$city), 'South Dakota', aam$state)
+
+aam$state <- ifelse(grepl('Major Metro Area', aam$city), 'Nevada', aam$state)
+aam$state <- ifelse(grepl('Cleveland', aam$city), 'Ohio', aam$state)
+aam$state <- ifelse(grepl('St. Thomas, USVI', aam$city), 'Florida', aam$state)
+aam$state <- ifelse(grepl('Madison', aam$city), 'Wisconsin', aam$state)
+aam$state <- ifelse(grepl('Houston', aam$city), 'Texas', aam$state)
+aam$state <- ifelse(grepl('DFW', aam$city), 'Texas', aam$state)
+aam$state <- ifelse(grepl('Dallas', aam$city), 'Texas', aam$state)
+aam$state <- ifelse(grepl('New Orleans', aam$city), 'Louisiana', aam$state)
+aam$state <- ifelse(grepl('Austin', aam$city), 'Texas', aam$state)
+aam$state <- ifelse(grepl('Durham', aam$city), 'North Carolina', aam$state)
+
+aam$state <- ifelse(grepl('Memphis', aam$city), 'Tennessee', aam$state)
+aam$state <- ifelse(grepl('Jackson', aam$city), 'Mississippi', aam$state)
+aam$state <- ifelse(grepl('longbeach', aam$city), 'California', aam$state)
+aam$state <- ifelse(grepl('Oaxaca',  aam$city), 'California', aam$state)
+aam$state <- ifelse(grepl('Bennington',  aam$city), 'Vermont', aam$state)
+aam$state <- ifelse(grepl('Midwest region', aam$city), 'Iowa', aam$state)
+aam$state <- ifelse(grepl('Major metropolitan area', aam$city), 'Indiana', aam$state)
+aam$state <- ifelse(grepl('Rochester', aam$city), 'New York', aam$state)
+aam$state <- ifelse(grepl('US govt employee overseas, country withheld', aam$city), 'District of Columbia', aam$state)
+aam$state <- ifelse(grepl('Colorado Springs', aam$city), 'Colorado', aam$state)
+
+aam$state <- ifelse(grepl('Phoenix', aam$city), 'Arizona', aam$state)
+aam$state <- ifelse(grepl('Cheyenne, Wy', aam$city), 'Wyoming', aam$state)
+aam$state <- ifelse(grepl('Streamwood', aam$city), 'Illinois', aam$state)
+aam$state <- ifelse(grepl('Aguadilla', aam$city), 'Mississippi', aam$state)
+aam$state <- ifelse(grepl('Wilmington', aam$city), 'Delaware', aam$state)
+aam$state <- ifelse(grepl('DC metro area', aam$city), 'District of Columbia', aam$state)
+aam$state <- ifelse(grepl('Washington dc', aam$city), 'District of Columbia', aam$state)
+aam$state <- ifelse(grepl('All of them', aam$city), 'Idaho', aam$state)
+aam$state <- ifelse(grepl('Mid-size city', aam$city), 'Vermont', aam$state)
+aam$state <- ifelse(grepl('Company is based in SF', aam$city), 'California', aam$state)
+
+```
+
+
+#### Clean compensation
+
+```{r Clean compensation}
+
+# Clean compensation in US
+
+# Assume many annual salary values were given in thousands
+
+aam$salary <- ifelse((aam$salary < 360 & aam$country == "usa"), aam$salary*1000, aam$salary)
+
+# Assume some salaries were reported as monthly: JoB title used for determination
+
+aam$salary <- ifelse((aam$salary > 1500 & aam$salary < 6000 & aam$country == "usa"), aam$salary*12, aam$salary)
+aam$oth_comp <- ifelse((aam$salary == 1442 & aam$oth_comp == 3010 & aam$country == "usa"), aam$oth_comp*12, aam$oth_comp)
+aam$salary <- ifelse((aam$salary == 1442 & aam$country == "usa"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 6400 & aam$oth_comp == 0 & aam$country == "usa"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 9000 & aam$oth_comp == 0 & aam$country == "usa"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 8000 & aam$oth_comp == 6000 & aam$country == "usa"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 12000 & aam$city == "Honolilu"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 13300 & aam$state == "Colorado"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 16000 & aam$job_title == "Director"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 18000 & aam$city == "Seattle Area"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 16500 & aam$oth_comp == 15000 & aam$country == "usa"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 10000 & aam$oth_comp == 5000 & aam$country == "usa"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 12000 & aam$oth_comp == 1000), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 12000 & aam$oth_comp == 11000 & aam$country == "usa"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 10500 & aam$oth_comp == 10500 & aam$country == "usa"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 13500 & aam$oth_comp == 0 & aam$country == "usa"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 14500 & aam$oth_comp == 0 & aam$country == "usa"), aam$salary*12, aam$salary)
+
+# Assume some salaries were reported as weekly
+
+aam$salary <- ifelse((aam$salary == 1000 & aam$oth_comp == 0 & aam$country == "usa"), aam$salary*52, aam$salary)
+
+# Assume some annual salaries had one too many zeroes: Used Job title to dxetermine
+
+aam$salary <- ifelse((aam$salary == 1100000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 1250000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 1900000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 1650000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 1334782 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 2111538 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 1260000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 832000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 560000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 657900 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 540000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 750000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 734400 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 700000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 800000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 875000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 850000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 570000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 603000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 510000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 920000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 954000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 860000 & aam$currency == "USD"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 450000 & aam$job_title == "Professor"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 300000 & aam$job_title == "Ceramic Artist"), aam$salary / 10, aam$salary)
+aam$salary <- ifelse((aam$salary == 500000 & aam$job_title == "Librarian"), aam$salary / 10, aam$salary)
+
+# Clean salary other than usa
+
+# Assume many annual salary values were given in thousands
+
+aam$salary <- ifelse((aam$salary == 72 & aam$country == "turkey"), aam$salary*1000, aam$salary)
+aam$salary <- ifelse((aam$salary == 264 & aam$country == "philippines"), aam$salary*1000, aam$salary)
+aam$oth_comp <- ifelse((aam$salary == 264 & aam$country == "philippines"), aam$oth_comp*1000, aam$oth_comp)
+aam$salary <- ifelse((aam$salary == 37 & aam$country == "france"), aam$salary*1000, aam$salary)
+aam$oth_comp <- ifelse((aam$salary == 37 & aam$country == "france"), aam$oth_comp*1000, aam$oth_comp)
+aam$salary <- ifelse((aam$salary < 200 & aam$country == "germany"), aam$salary*1000, aam$salary)
+aam$salary <- ifelse((aam$salary < 200 & aam$country == "canada"), aam$salary*1000, aam$salary)
+aam$salary <- ifelse((aam$salary < 200 & aam$country == "uk"), aam$salary*1000, aam$salary)
+aam$salary <- ifelse((aam$salary < 200 & aam$country == "netherlands"), aam$salary*1000, aam$salary)
+aam$salary <- ifelse((aam$salary < 200 & aam$country == "switzerland"), aam$salary*1000, aam$salary)
+aam$salary <- ifelse((aam$salary < 200 & aam$country == "spain"), aam$salary*1000, aam$salary)
+aam$salary <- ifelse((aam$salary < 200 & aam$country == "ireland"), aam$salary*1000, aam$salary)
+aam$salary <- ifelse((aam$salary < 200 & aam$country == "finland"), aam$salary*1000, aam$salary)
+aam$salary <- ifelse((aam$salary < 200 & aam$country == "italy"), aam$salary*1000, aam$salary)
+aam$salary <- ifelse((aam$salary < 200 & aam$country == "brazil"), aam$salary*1000, aam$salary)
+
+# Assume some annual salaries were given as monthly
+ 
+aam$salary <- ifelse((aam$salary == 1750 & aam$country == "netherlands"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 4400 & aam$country == "uk"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 2200 & aam$country == "uk"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 6600 & aam$country == "uk"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 2400 & aam$country == "belgium"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 5427 & aam$country == "germany"), aam$salary*12, aam$salary)
+aam$salary <- ifelse((aam$salary == 7390 & aam$country == "nigeria"), aam$salary*12, aam$salary)
+
+```
+
+#### Fix currency values, including other
+
+```{r Fix currency values}
+
+aam$currency_other[is.na(aam$currency_other)] <- " "
+
+aam$currency <- ifelse((aam$currency == "AUD/NZD") & (aam$country == "australia"), "AUD", aam$currency)
+aam$currency <- ifelse((aam$currency == "AUD/NZD") & (aam$country == "new zealand"), "NZD", aam$currency)
+aam$currency <- ifelse((aam$currency == "AUD/NZD") & (aam$country == "usa"), "USD", aam$currency)
+aam$currency <- ifelse((aam$currency == "AUD/NZD") & (aam$country == "canada"), "CAD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "SEK"), "SEK", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "GBP"), "GBP", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "AUD Australian"), "AUD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Australian Dollars"), "AUD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "AUD"), "AUD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "NZD"), "NZD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Euro"), "EUR", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "EUR"), "EUR", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == " ") & (aam$country == "usa"), "USD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "USD"), "USD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Equity"), "USD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "American Dollars"), "USD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "US Dollar"), "USD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "CHF"), "CHF", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "CAD"), "CAD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "CNY"), "CNY", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "RMB (chinese yuan)"), "CNY", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "China RMB"), "CNY", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "MXN"), "MXN", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "MYR"), "MYR", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "RM"), "MYR", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "ZAR"), "ZAR", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "SAR"), "SAR", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "INR"), "INR", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Indian rupees"), "INR", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "INR (Indian Rupee)"), "INR", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "NOK"), "NOK", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Nok"), "NOK", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Norwegian kroner (NOK)"), "NOK", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Mexican Pesos"), "MXN", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Mexican pesos"), "MXN", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "ARS"), "ARS", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Argentinian peso (ARS)"), "ARS", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Peso Argentino"), "ARS", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Argentine Peso"), "ARS", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Bdt"), "BDT", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "CZK"), "CZK", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Czk"), "CZK", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "czech crowns"), "CZK", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "DKK"), "DKK", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Dkk"), "DKK", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "dkk"), "DKK", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Danish Kroner"), "DKK", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "PHP"), "PHP", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Php"), "PHP", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Philippine Peso"), "PHP", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Philippine peso (PHP)"), "PHP", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "PhP (Philippine Peso)"), "PHP", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Philippine Pesos"), "PHP", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "SGD"), "SGD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Sgd"), "SGD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "TTD"), "TTD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "NTD"), "NTD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Taiwanese dollars"), "NTD", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "LKR"), "LKR", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "BRL"), "BRL", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "BR$"), "BRL", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "BRL (R$)"), "BRL", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "ILS"), "ILS", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "ILS/NIS"), "ILS", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "NIS (new Israeli shekel)"), "ILS", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "ILS (Shekel)"), "ILS", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Ils"), "ILS", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Israeli Shekels"), "ILS", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "THB"), "THB", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "THAI BAHT"), "THB", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "KRW"), "KRW", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "TRY"), "TRY", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "IDR"), "IDR", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "PLN"), "PLN", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "PLN (Polish zloty)"), "PLN",aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Polish ZÅ‚oty"), "PLN", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "Korean Won"), "KRW", aam$currency)
+aam$currency <- ifelse((aam$currency == "Other") & (aam$currency_other == "KRW (Korean Won)"), "KRW", aam$currency)
+
+aam$currency <- ifelse((aam$currency_other == "COP"), "COP", aam$currency)
+aam$currency <- ifelse( aam$currency == "Other", "THB", aam$currency)
+aam$currency <- ifelse((aam$currency == "JPY") & (aam$salary == 27500) & (aam$country == "japan"), "USD", aam$currency)
+aam$currency <- ifelse((aam$currency == "SEK") & (aam$country == "usa"), "USD", aam$currency)
+aam$currency <- ifelse((aam$currency == "USD") & (aam$currency_other == "DKK"), "DKK", aam$currency)
+
+```
+
+#### Clean age, gender, education, race, prof_exp and field_exp
+#### Create new columns for plotting
+
+```{r More Cleaning up}
+
+# Clean Age
+# Reduce age to 5 levels: 24-, 25-34, 35-44, 45-54, 55+
+
+aam$age[aam$age == "65 or over"] <- "55+"
+aam$age[aam$age == "55-64"] <- "55+"
+aam$age[aam$age == "under 18"] <- "24-"
+aam$age[aam$age == "18-24"] <- "24-"
+
+# Add mid point column for age ranges
+
+aam$age_mid = 0
+aam$age_mid[aam$age == "24-"] <- 20
+aam$age_mid[aam$age == "25-34"] <- 30
+aam$age_mid[aam$age == "35-44"] <- 40
+aam$age_mid[aam$age == "45-54"] <- 50
+aam$age_mid[aam$age == "55+"] <- 60
+
+# Add scale column for age ranges
+
+aam$age_scale[aam$age == "55+"] <- "Old"
+aam$age_scale[aam$age == "45-54"] <- "Old"
+aam$age_scale[aam$age == "35-44"] <- "Middle"
+aam$age_scale[aam$age == "25-34"] <- "Young"
+aam$age_scale[aam$age == "24-"] <- "Young"
+
+# Clean gender
+# Combine gender non-binary and Other
+
+aam$gender[is.na(aam$gender)] <- "Other"
+aam$gender[aam$gender == "Prefer not to answer"] <- "Other"
+aam$gender[aam$gender == "Other or prefer not to answer"] <- "Other"
+aam$gender[aam$gender == "Non-binary"] <- "Other"
+
+# Add Woman or not woman column
+
+aam$wom_notwom <- "Woman"
+aam$wom_notwom[aam$gender != "Woman"] <- "Not Woman"
+
+# Clean race
+# Reduce length of level and choose among multiple selections
+# Combine Native American with Hispanic
+# Combine Middle Eastern with Other
+
+aam$race[is.na(aam$race)] <- "Other"
+
+aam$race <- ifelse(grepl('Black', aam$race), 'Black', aam$race)
+aam$race <- ifelse(grepl('Asian ', aam$race), 'Asian ', aam$race)
+aam$race <- ifelse(grepl('Hispanic', aam$race), 'Hispanic', aam$race)
+aam$race <- ifelse(grepl('Native American', aam$race), 'Hispanic', aam$race)
+aam$race <- ifelse(grepl('Middle Eastern', aam$race), 'Other', aam$race)
+aam$race <- ifelse(grepl('White', aam$race), 'White', aam$race)
+aam$race <- ifelse(grepl('Another', aam$race), 'Other', aam$race)
+
+# Add White or not White column
+
+aam$wht_notwht <- "White"
+aam$wht_notwht[aam$race != "White"] <- "Not White"
+
+# Add Race-Gender column
+
+aam$race_gen = "White Woman"
+aam$race_gen[aam$race == "White" & aam$gender != "Woman"] <- "White Not Woman"
+aam$race_gen[aam$race != "White" & aam$gender == "Woman"] <- "Not White Woman"
+aam$race_gen[aam$race != "White" & aam$gender != "Woman"] <- "Not White Not Woman"
+
+# Clean education
+# Make missing education as High School
+
+aam$education[is.na(aam$education)] <- "High School"
+
+# Reduce level name for Professional degree
+
+aam$education[aam$education == "Professional degree (MD, JD, etc.)"] <- "Professional degree"
+
+# Create ordinal levels for education
+
+aam$edu_num <- 1
+aam$edu_num[aam$education == "Some college"] <- 2
+aam$edu_num[aam$education == "College degree"] <- 3
+aam$edu_num[aam$education == "Master's degree"] <- 4
+aam$edu_num[aam$education == "PhD"] <- 5
+aam$edu_num[aam$education == "Professional degree"] <- 6
+
+# Add scale column for education 
+
+aam$edu_scale[aam$edu_num <= 2] <- "Low"
+aam$edu_scale[aam$edu_num == 3] <- "Medium"
+aam$edu_scale[aam$edu_num >= 4] <- "High"
+
+# Clean prof_exp
+# Change factor levels for prof_exp
+# Combine first 10 years and over 40
+
+aam$prof_exp[aam$prof_exp == "1 year or less"] <- "10-"
+aam$prof_exp[aam$prof_exp == "2 - 4 years"] <- "10-"
+aam$prof_exp[aam$prof_exp == "5-7 years"] <- "10-"
+aam$prof_exp[aam$prof_exp == "8 - 10 years"] <- "10-"
+aam$prof_exp[aam$prof_exp == "11 - 20 years"] <- "11-20"
+aam$prof_exp[aam$prof_exp == "21 - 30 years"] <- "21-30"
+aam$prof_exp[aam$prof_exp == "31 - 40 years"] <- "31+"
+aam$prof_exp[aam$prof_exp == "41 years or more"] <- "31+"
+
+# Add mid point column for prof_exp ranges
+
+aam$prof_exp_mid = 0
+aam$prof_exp_mid[aam$prof_exp == "10-"] <- 5
+aam$prof_exp_mid[aam$prof_exp == "11-20"] <- 15
+aam$prof_exp_mid[aam$prof_exp == "21-30"] <- 25
+aam$prof_exp_mid[aam$prof_exp == "31+"] <- 35
+
+# Clean field_exp
+# Change factor levels for field_exp
+# Combine first 10 years and over 40
+
+aam$field_exp[aam$field_exp == "1 year or less"] <- "10-"
+aam$field_exp[aam$field_exp == "2 - 4 years"] <- "10-"
+aam$field_exp[aam$field_exp == "5-7 years"] <- "10-"
+aam$field_exp[aam$field_exp == "8 - 10 years"] <- "10-"
+aam$field_exp[aam$field_exp == "11 - 20 years"] <- "11-20"
+aam$field_exp[aam$field_exp == "21 - 30 years"] <- "21-30"
+aam$field_exp[aam$field_exp == "31 - 40 years"] <- "31+"
+aam$field_exp[aam$field_exp == "41 years or more"] <- "31+"
+
+# Add mid point column for prof_exp ranges
+
+aam$field_exp_mid = 0
+aam$field_exp_mid[aam$field_exp == "10-"] <- 5
+aam$field_exp_mid[aam$field_exp == "11-20"] <- 15
+aam$field_exp_mid[aam$field_exp == "21-30"] <- 25
+aam$field_exp_mid[aam$field_exp == "31+"] <- 35
+
+```
+
+#### Clean up the industry names
+
+```{r Clean up the industry names}
+
+tab_woman <- as.table(table(aam$wom_notwom))
+prop.table(tab_woman)
+
+aam$industry[is.na(aam$industry)] <- "Other"
+
+aam$industry <- ifelse(grepl('Accounting', aam$industry, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+aam$industry <- ifelse(grepl('Banking', aam$industry, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+aam$industry <- ifelse(grepl('Finance', aam$industry, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+aam$industry <- ifelse(grepl('Wealth', aam$industry, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+aam$industry <- ifelse(grepl('econom', aam$industry, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+aam$industry <- ifelse(grepl('Entrepreneur', aam$industry, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+aam$industry <- ifelse(grepl('Think tank', aam$industry, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+aam$industry <- ifelse(grepl('Strategy', aam$industry, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+aam$industry <- ifelse(grepl('mortgage', aam$industry, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+aam$industry <- ifelse(grepl('Investing', aam$industry, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+
+aam$industry <- ifelse(grepl('Agriculture', aam$industry, ignore.case = TRUE), 'Agriculture or Forestry', aam$industry)
+aam$industry <- ifelse(grepl('Forestry', aam$industry, ignore.case = TRUE), 'Agriculture or Forestry', aam$industry)
+aam$industry <- ifelse(grepl('cannabis', aam$industry, ignore.case = TRUE), 'Agriculture or Forestry', aam$industry)
+aam$industry <- ifelse(grepl('fisherman', aam$industry, ignore.case = TRUE), 'Agriculture or Forestry', aam$industry)
+aam$industry <- ifelse(grepl('Landscaping', aam$industry, ignore.case = TRUE), 'Agriculture or Forestry', aam$industry)
+aam$industry <- ifelse(grepl('Conservation', aam$industry, ignore.case = TRUE), 'Agriculture or Forestry', aam$industry)
+aam$industry <- ifelse(grepl('survey', aam$industry, ignore.case = TRUE), 'Agriculture or Forestry', aam$industry)
+
+aam$industry <- ifelse(grepl('Art', aam$industry, ignore.case = TRUE), 'Art & Design', aam$industry)
+aam$industry <- ifelse(grepl('Design', aam$industry, ignore.case = TRUE), 'Art & Design', aam$industry)
+
+aam$industry <- ifelse(grepl('Animal', aam$industry, ignore.case = TRUE), 'Animal Welfare', aam$industry)
+aam$industry <- ifelse(grepl('Vet', aam$industry, ignore.case = TRUE), 'Animal Welfare', aam$industry)
+aam$industry <- ifelse(grepl('Zoo', aam$industry, ignore.case = TRUE), 'Animal Welfare', aam$industry)
+aam$industry <- ifelse(grepl('Pet', aam$industry, ignore.case = TRUE), 'Animal Welfare', aam$industry)
+aam$industry <- ifelse(grepl('Pest', aam$industry, ignore.case = TRUE), 'Animal Welfare', aam$industry)
+
+aam$industry <- ifelse(grepl('Auto', aam$industry, ignore.case = TRUE), 'Automotive', aam$industry)
+
+aam$industry <- ifelse(grepl('Comput', aam$industry, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('IT', aam$industry, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Analytic', aam$industry, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Video Game', aam$industry, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Data', aam$industry, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Tech', aam$industry, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Saas', aam$industry, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Software', aam$industry, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Information', aam$industry, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Game dev', aam$industry, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Games dev', aam$industry, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+
+aam$industry <- ifelse(grepl('Bio', aam$industry, ignore.case = TRUE), 'Biotechnology', aam$industry)
+aam$industry <- ifelse(grepl('Pharm', aam$industry, ignore.case = TRUE), 'Biotechnology', aam$industry)
+aam$industry <- ifelse(grepl('Drug', aam$industry, ignore.case = TRUE), 'Biotechnology', aam$industry)
+aam$industry <- ifelse(grepl('Clinical', aam$industry, ignore.case = TRUE), 'Biotechnology', aam$industry)
+
+aam$industry <- ifelse(grepl('Business', aam$industry, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Consult', aam$industry, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Planning', aam$industry, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('B2B', aam$industry, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Admin', aam$industry, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Organization', aam$industry, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+
+aam$industry <- ifelse(grepl('Librar', aam$industry, ignore.case = TRUE), 'Libraries and Museums', aam$industry)
+aam$industry <- ifelse(grepl('Archive', aam$industry, ignore.case = TRUE), 'Libraries and Museums', aam$industry)
+aam$industry <- ifelse(grepl('cultural', aam$industry, ignore.case = TRUE), 'Libraries and Museums', aam$industry)
+aam$industry <- ifelse(grepl('culture', aam$industry, ignore.case = TRUE), 'Libraries and Museums', aam$industry)
+aam$industry <- ifelse(grepl('Museum', aam$industry, ignore.case = TRUE), 'Libraries and Museums', aam$industry)
+aam$industry <- ifelse(grepl('Archaeol', aam$industry, ignore.case = TRUE), 'Libraries and Museums', aam$industry)
+aam$industry <- ifelse(grepl('Cultural Resource', aam$industry, ignore.case = TRUE), 'Libraries and Museums', aam$industry)
+
+aam$industry <- ifelse(grepl('Education', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Ed Tech', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Educ', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Training', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Academi', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('School', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Work-Study', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Learning', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Teacher', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Language Services', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('PhD', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Translation', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Workforce development', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Student', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Instructor', aam$industry, ignore.case = TRUE), 'Education', aam$industry)
+aam$industry <- ifelse(grepl('Graduate assistant', aam$industry, ignore.case = TRUE),  'Education', aam$industry)
+
+aam$industry <- ifelse(grepl('Daycare', aam$industry, ignore.case = TRUE), 'Child Care', aam$industry)
+aam$industry <- ifelse(grepl('Child', aam$industry, ignore.case = TRUE), 'Child Care', aam$industry)
+aam$industry <- ifelse(grepl('Stay', aam$industry, ignore.case = TRUE), 'Child Care', aam$industry)
+
+aam$industry <- ifelse(grepl('Science', aam$industry, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('research', aam$industry, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('Scientific', aam$industry, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('Scientist', aam$industry, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('R&D', aam$industry, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('Geologist', aam$industry, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('Geospatial', aam$industry, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('laboratory', aam$industry, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('Space', aam$industry, ignore.case = TRUE), 'Science', aam$industry)
+
+aam$industry <- ifelse(grepl('Engineer', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Manufacturing', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Chemist', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Chemical', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Defense', aam$industry, ignore.case = TRUE),  'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Food Manufacture', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Food processing', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Multilateral', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Natural Resources', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Inspection', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Product Management', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Mining', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('FMCG', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Industrial Hygiene', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Industrial', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Equipment', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Operations', aam$industry, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+
+aam$industry <- ifelse(grepl('Entertainment', aam$industry, ignore.case = TRUE), 'Entertainment', aam$industry)
+aam$industry <- ifelse(grepl('Music', aam$industry, ignore.case = TRUE), 'Entertainment', aam$industry)
+aam$industry <- ifelse(grepl('Theatre', aam$industry, ignore.case = TRUE), 'Entertainment', aam$industry)
+
+aam$industry <- ifelse(grepl('Government', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Public Administration', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Administrati', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Waste', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Compliance', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('DOT', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Housing', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Urban Planning', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Regulatory', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Public Policy', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Lobbying', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Intelligence', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('International', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Immigration', aam$industry, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+
+aam$industry <- ifelse(grepl('Health', aam$industry, ignore.case = TRUE), 'Health care', aam$industry)
+aam$industry <- ifelse(grepl('Nurs', aam$industry, ignore.case = TRUE), 'Health care', aam$industry)
+aam$industry <- ifelse(grepl('Virtual Assisting', aam$industry, ignore.case = TRUE), 'Health care', aam$industry)
+aam$industry <- ifelse(grepl('Caregiver', aam$industry, ignore.case = TRUE), 'Health care', aam$industry)
+aam$industry <- ifelse(grepl('Medical', aam$industry, ignore.case = TRUE), 'Health care', aam$industry)
+aam$industry <- ifelse(grepl('Emergency', aam$industry, ignore.case = TRUE), 'Health care', aam$industry)
+aam$industry <- ifelse(grepl('Funeral', aam$industry, ignore.case = TRUE), 'Health care', aam$industry)
+aam$industry <- ifelse(grepl('MedComms', aam$industry, ignore.case = TRUE), 'Health care', aam$industry)
+
+aam$industry <- ifelse(grepl('Hospitality', aam$industry, ignore.case = TRUE), 'Hospitality & Events', aam$industry)
+aam$industry <- ifelse(grepl('Hotel', aam$industry, ignore.case = TRUE), 'Hospitality & Events', aam$industry)
+aam$industry <- ifelse(grepl('Restaur', aam$industry, ignore.case = TRUE), 'Hospitality & Events', aam$industry)
+aam$industry <- ifelse(grepl('Food', aam$industry, ignore.case = TRUE), 'Hospitality & Events', aam$industry)
+aam$industry <- ifelse(grepl('Household', aam$industry, ignore.case = TRUE),  'Hospitality & Events', aam$industry)
+aam$industry <- ifelse(grepl('Housekeeper', aam$industry, ignore.case = TRUE), 'Hospitality & Events', aam$industry)
+aam$industry <- ifelse(grepl('Human services', aam$industry, ignore.case = TRUE), 'Hospitality & Events', aam$industry)
+aam$industry <- ifelse(grepl('service', aam$industry, ignore.case = TRUE), 'Hospitality & Events', aam$industry)
+aam$industry <- ifelse(grepl('Laundry', aam$industry, ignore.case = TRUE), 'Hospitality & Events', aam$industry)
+
+aam$industry <- ifelse(grepl('Insurance', aam$industry, ignore.case = TRUE), 'Insurance', aam$industry)
+aam$industry <- ifelse(grepl('Actuar', aam$industry, ignore.case = TRUE), 'Insurance', aam$industry)
+
+aam$industry <- ifelse(grepl('Law Enforcement', aam$industry, ignore.case = TRUE), 'Police & Security', aam$industry)
+aam$industry <- ifelse(grepl('Security', aam$industry, ignore.case = TRUE), 'Police & Security', aam$industry)
+aam$industry <- ifelse(grepl('Police', aam$industry, ignore.case = TRUE), 'Police & Security', aam$industry)
+aam$industry <- ifelse(grepl('Fire', aam$industry, ignore.case = TRUE), 'Police & Security', aam$industry)
+aam$industry <- ifelse(grepl('Public safety', aam$industry, ignore.case = TRUE), 'Police & Security', aam$industry)
+aam$industry <- ifelse(grepl('Forensics', aam$industry, ignore.case = TRUE), 'Police & Security', aam$industry)
+
+aam$industry <- ifelse(grepl('Law', aam$industry, ignore.case = TRUE), 'Law', aam$industry)
+aam$industry <- ifelse(grepl('Contract', aam$industry, ignore.case = TRUE), 'Law', aam$industry)
+aam$industry <- ifelse(grepl('Legal', aam$industry, ignore.case = TRUE), 'Law', aam$industry)
+
+aam$industry <- ifelse(grepl('Leisure', aam$industry, ignore.case = TRUE), 'Leisure, Sport & Tourism', aam$industry)
+aam$industry <- ifelse(grepl('Sport', aam$industry, ignore.case = TRUE), 'Leisure, Sport & Tourism', aam$industry)
+aam$industry <- ifelse(grepl('Tourism', aam$industry, ignore.case = TRUE), 'Leisure, Sport & Tourism', aam$industry)
+aam$industry <- ifelse(grepl('Travel', aam$industry, ignore.case = TRUE),  'Leisure, Sport & Tourism', aam$industry)
+aam$industry <- ifelse(grepl('coaching', aam$industry, ignore.case = TRUE),  'Leisure, Sport & Tourism', aam$industry)
+aam$industry <- ifelse(grepl('Athletics', aam$industry, ignore.case = TRUE), 'Leisure, Sport & Tourism', aam$industry)
+aam$industry <- ifelse(grepl('Gaming', aam$industry, ignore.case = TRUE), 'Leisure, Sport & Tourism', aam$industry)
+aam$industry <- ifelse(grepl('Gambling', aam$industry, ignore.case = TRUE), 'Leisure, Sport & Tourism', aam$industry)
+aam$industry <- ifelse(grepl('Gyms', aam$industry, ignore.case = TRUE), 'Leisure, Sport & Tourism', aam$industry)
+
+aam$industry <- ifelse(grepl('Market', aam$industry, ignore.case = TRUE), 'Marketing, Advertising & PR', aam$industry)
+aam$industry <- ifelse(grepl('Advertis', aam$industry, ignore.case = TRUE), 'Marketing, Advertising & PR', aam$industry)
+aam$industry <- ifelse(grepl('Public Relations', aam$industry, ignore.case = TRUE), 'Marketing, Advertising & PR', aam$industry)
+aam$industry <- ifelse(grepl('Consumer Research', aam$industry, ignore.case = TRUE), 'Marketing, Advertising & PR', aam$industry)
+aam$industry <- ifelse(grepl('Association', aam$industry, ignore.case = TRUE), 'Marketing, Advertising & PR', aam$industry)
+aam$industry <- ifelse(grepl('PR', aam$industry, ignore.case = TRUE), 'Marketing, Advertising & PR', aam$industry)
+
+aam$industry <- ifelse(grepl('Media', aam$industry, ignore.case = TRUE), 'Media & Digital', aam$industry)
+aam$industry <- ifelse(grepl('Reporter', aam$industry, ignore.case = TRUE), 'Media & Digital', aam$industry)
+aam$industry <- ifelse(grepl('publish', aam$industry, ignore.case = TRUE), 'Media & Digital', aam$industry)
+aam$industry <- ifelse(grepl("Children's Book", aam$industry, ignore.case = TRUE), 'Media & Digital', aam$industry)
+aam$industry <- ifelse(grepl("Communication", aam$industry, ignore.case = TRUE), 'Media & Digital', aam$industry)
+aam$industry <- ifelse(grepl('Copyright', aam$industry, ignore.case = TRUE), 'Media & Digital', aam$industry)
+aam$industry <- ifelse(grepl('Publications', aam$industry, ignore.case = TRUE), 'Media & Digital', aam$industry)
+aam$industry <- ifelse(grepl('Print', aam$industry, ignore.case = TRUE), 'Media & Digital', aam$industry)
+aam$industry <- ifelse(grepl('Journalism', aam$industry, ignore.case = TRUE), 'Media & Digital', aam$industry)
+
+aam$industry <- ifelse(grepl('Nonprofits', aam$industry, ignore.case = TRUE), 'Nonprofits', aam$industry)
+aam$industry <- ifelse(grepl('AmeriCorps', aam$industry, ignore.case = TRUE), 'Nonprofits', aam$industry)
+aam$industry <- ifelse(grepl('Philanthropy', aam$industry, ignore.case = TRUE), 'Nonprofits', aam$industry)
+aam$industry <- ifelse(grepl('Fundraising', aam$industry, ignore.case = TRUE), 'Nonprofits', aam$industry)
+
+aam$industry <- ifelse(grepl('Chaplain', aam$industry, ignore.case = TRUE), 'Religion', aam$industry)
+aam$industry <- ifelse(grepl('Church', aam$industry, ignore.case = TRUE), 'Religion', aam$industry)
+aam$industry <- ifelse(grepl('Clergy', aam$industry, ignore.case = TRUE), 'Religion', aam$industry)
+aam$industry <- ifelse(grepl('Religio', aam$industry, ignore.case = TRUE), 'Religion', aam$industry)
+aam$industry <- ifelse(grepl('Ministry', aam$industry, ignore.case = TRUE), 'Religion', aam$industry)
+
+aam$industry <- ifelse(grepl('Costruction', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('Concrete', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('real estate', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('Construction', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('Property', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('Outdoor industry', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('project management', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('Electric', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('Skilled trade', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('Plumb', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('HVAC', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('restoration', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+aam$industry <- ifelse(grepl('parking', aam$industry, ignore.case = TRUE), 'Property or Construction', aam$industry)
+
+aam$industry <- ifelse(grepl('Human Resources', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('Background Screening', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('Executive search', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('Recruit', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('Executive Leadership', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('Staffing', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('union', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('Labor', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('Outsourcing', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('labour', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('Indeed', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('HRO', aam$industry, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+
+aam$industry <- ifelse(grepl('Beauty', aam$industry, ignore.case = TRUE), 'Fashion and Beauty', aam$industry)
+aam$industry <- ifelse(grepl('Cosmetology', aam$industry, ignore.case = TRUE), 'Fashion and Beauty', aam$industry)
+aam$industry <- ifelse(grepl('Fashion', aam$industry, ignore.case = TRUE), 'Fashion and Beauty', aam$industry)
+aam$industry <- ifelse(grepl('Tailor', aam$industry, ignore.case = TRUE), 'Fashion and Beauty', aam$industry)
+aam$industry <- ifelse(grepl('Retired', aam$industry, ignore.case = TRUE), 'Fashion and Beauty', aam$industry)
+aam$industry <- ifelse(grepl('Apparel', aam$industry, ignore.case = TRUE), 'Fashion and Beauty', aam$industry)
+
+aam$industry <- ifelse(grepl('Sales', aam$industry, ignore.case = TRUE),  'Sales', aam$industry)
+aam$industry <- ifelse(grepl('Call center', aam$industry, ignore.case = TRUE), 'Sales', aam$industry)
+aam$industry <- ifelse(grepl('Wholesale', aam$industry, ignore.case = TRUE), 'Sales', aam$industry)
+aam$industry <- ifelse(grepl('Consumer Goods', aam$industry, ignore.case = TRUE), 'Sales', aam$industry)
+aam$industry <- ifelse(grepl('Consumer packaged goods', aam$industry, ignore.case = TRUE), 'Sales', aam$industry)
+aam$industry <- ifelse(grepl('Customer service', aam$industry, ignore.case = TRUE), 'Sales', aam$industry)
+aam$industry <- ifelse(grepl('Auction house', aam$industry, ignore.case = TRUE), 'Sales', aam$industry)
+aam$industry <- ifelse(grepl('Warehous', aam$industry, ignore.case = TRUE),   'Sales', aam$industry)
+aam$industry <- ifelse(grepl('Contact center', aam$industry, ignore.case = TRUE), 'Sales', aam$industry)
+
+aam$industry <- ifelse(grepl('Retail', aam$industry, ignore.case = TRUE), 'Retail', aam$industry)
+aam$industry <- ifelse(grepl('e-comm', aam$industry, ignore.case = TRUE), 'Retail', aam$industry)
+aam$industry <- ifelse(grepl('ecomm', aam$industry, ignore.case = TRUE), 'Retail', aam$industry)
+aam$industry <- ifelse(grepl('e comm', aam$industry, ignore.case = TRUE), 'Retail', aam$industry)
+aam$industry <- ifelse(grepl('Consumer', aam$industry, ignore.case = TRUE), 'Retail', aam$industry)
+aam$industry <- ifelse(grepl('awards and engraving', aam$industry, ignore.case = TRUE), 'Retail', aam$industry)
+aam$industry <- ifelse(grepl('Purchasing', aam$industry, ignore.case = TRUE), 'Retail', aam$industry)
+aam$industry <- ifelse(grepl('Buyer', aam$industry, ignore.case = TRUE),  'Retail', aam$industry)
+
+aam$industry <- ifelse(grepl('Beverage', aam$industry, ignore.case = TRUE), 'Beverage', aam$industry)
+aam$industry <- ifelse(grepl('Brew', aam$industry, ignore.case = TRUE), 'Beverage', aam$industry)
+aam$industry <- ifelse(grepl('Beer', aam$industry, ignore.case = TRUE), 'Beverage', aam$industry)
+aam$industry <- ifelse(grepl('Wine', aam$industry, ignore.case = TRUE), 'Beverage', aam$industry)
+aam$industry <- ifelse(grepl('Coffee', aam$industry, ignore.case = TRUE), 'Beverage', aam$industry)
+
+aam$industry <- ifelse(grepl('Social Work', aam$industry, ignore.case = TRUE), 'Social Work', aam$industry)
+aam$industry <- ifelse(grepl('Counsel', aam$industry, ignore.case = TRUE), 'Social Work', aam$industry)
+aam$industry <- ifelse(grepl('Social', aam$industry, ignore.case = TRUE),  'Social Work', aam$industry)
+aam$industry <- ifelse(grepl('group  home', aam$industry, ignore.case = TRUE), 'Social Work', aam$industry)
+aam$industry <- ifelse(grepl('Psycho', aam$industry, ignore.case = TRUE), 'Social Work', aam$industry)
+aam$industry <- ifelse(grepl('Therap', aam$industry, ignore.case = TRUE), 'Social Work', aam$industry)
+aam$industry <- ifelse(grepl('eap', aam$industry, ignore.case = TRUE), 'Social Work', aam$industry)
+aam$industry <- ifelse(grepl('estate', aam$industry, ignore.case = TRUE),  'Social Work', aam$industry)
+aam$industry <- ifelse(grepl('Summer camp', aam$industry, ignore.case = TRUE), 'Social Work', aam$industry)
+aam$industry <- ifelse(grepl('Family', aam$industry, ignore.case = TRUE), 'Social Work', aam$industry)
+
+aam$industry <- ifelse(grepl('Transport', aam$industry, ignore.case = TRUE), 'Transportion or Logistics', aam$industry)
+aam$industry <- ifelse(grepl('Aviation', aam$industry, ignore.case = TRUE), 'Transportion or Logistics', aam$industry)
+aam$industry <- ifelse(grepl('Airline', aam$industry, ignore.case = TRUE),  'Transportion or Logistics', aam$industry)
+aam$industry <- ifelse(grepl('Logistics', aam$industry, ignore.case = TRUE), 'Transportion or Logistics', aam$industry)
+aam$industry <- ifelse(grepl('Aerospace', aam$industry, ignore.case = TRUE), 'Transportion or Logistics', aam$industry)
+aam$industry <- ifelse(grepl('Distribution', aam$industry, ignore.case = TRUE), 'Transportion or Logistics', aam$industry)
+aam$industry <- ifelse(grepl('Delivery', aam$industry, ignore.case = TRUE), 'Transportion or Logistics', aam$industry)
+aam$industry <- ifelse(grepl('Sourcing', aam$industry, ignore.case = TRUE), 'Transportion or Logistics', aam$industry)
+aam$industry <- ifelse(grepl('Procurement', aam$industry, ignore.case = TRUE), 'Transportion or Logistics', aam$industry)
+aam$industry <- ifelse(grepl('Supply Chain', aam$industry, ignore.case = TRUE), 'Transportion or Logistics', aam$industry)
+
+aam$industry <- ifelse(grepl('Environment', aam$industry, ignore.case = TRUE), 'Environmental', aam$industry)
+aam$industry <- ifelse(grepl('Enviroment', aam$industry, ignore.case = TRUE), 'Environmental', aam$industry)
+aam$industry <- ifelse(grepl('Clean Energy', aam$industry, ignore.case = TRUE), 'Environmental', aam$industry)
+aam$industry <- ifelse(grepl('ecology', aam$industry, ignore.case = TRUE), 'Environmental', aam$industry)
+aam$industry <- ifelse(grepl('Toxicology', aam$industry, ignore.case = TRUE), 'Environmental', aam$industry)
+aam$industry <- ifelse(grepl('Renewable', aam$industry, ignore.case = TRUE), 'Environmental', aam$industry)
+aam$industry <- ifelse(grepl('recycl', aam$industry, ignore.case = TRUE), 'Environmental', aam$industry)
+
+aam$industry <- ifelse(grepl('Utilit', aam$industry, ignore.case = TRUE), 'Utilities & Telecommunications', aam$industry)
+aam$industry <- ifelse(grepl('Telecom', aam$industry, ignore.case = TRUE), 'Utilities & Telecommunications', aam$industry)
+aam$industry <- ifelse(grepl('electri', aam$industry, ignore.case = TRUE), 'Utilities & Telecommunications', aam$industry)
+aam$industry <- ifelse(grepl('Energy', aam$industry, ignore.case = TRUE), 'Utilities & Telecommunications', aam$industry)
+aam$industry <- ifelse(grepl('Oil', aam$industry, ignore.case = TRUE), 'Utilities & Telecommunications', aam$industry)
+aam$industry <- ifelse(grepl('Internet', aam$industry, ignore.case = TRUE), 'Utilities & Telecommunications', aam$industry)
+
+aam$industry <- ifelse(grepl('Police & Security', aam$industry, ignore.case = TRUE), 'Law Enforcement & Security', aam$industry)
+
+```
+
+####  Set industry name from Job Title
+
+```{r  Set Industry from Job Title}
+
+# Set Industry from Job Title
+
+aam$industry <- ifelse(grepl('EA', aam$job_title, ignore.case = TRUE), 'Social Work', aam$industry)
+aam$industry <- ifelse(grepl('supply Planner', aam$job_title, ignore.case = TRUE), 'Transportion or Logistics', aam$industry)
+aam$industry <- ifelse(grepl('childhood', aam$job_title, ignore.case = TRUE), 'Child Care', aam$industry)
+aam$industry <- ifelse(grepl('Auto', aam$job_title, ignore.case = TRUE), 'Automotive', aam$industry)
+aam$industry <- ifelse(grepl('Editor', aam$job_title, ignore.case = TRUE), 'Media & Digital', aam$industry)
+aam$industry <- ifelse(grepl('Librarian', aam$job_title, ignore.case = TRUE), 'Libraries and Museums', aam$industry)
+aam$industry <- ifelse(grepl('Veterinarian', aam$job_title, ignore.case = TRUE), 'Animal Welfare', aam$industry)
+aam$industry <- ifelse(grepl('HR', aam$job_title, ignore.case = TRUE), 'Recruitment or HR', aam$industry)
+aam$industry <- ifelse(grepl('Translator', aam$job_title, ignore.case = TRUE), 'Education', aam$industry)
+
+aam$industry <- ifelse(grepl('Cybersecurity', aam$job_title, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Digital strategy', aam$job_title, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Software', aam$job_title, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('Technical', aam$job_title, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+aam$industry <- ifelse(grepl('QA', aam$job_title, ignore.case = TRUE), 'Computing or Tech', aam$industry)
+
+aam$industry <- ifelse(grepl('Proposal Manager', aam$job_title, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Director', aam$job_title, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('office manager', aam$job_title, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Office Supervisor', aam$job_title, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Svp', aam$job_title, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Business Analyst', aam$job_title, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Executive Assistant', aam$job_title, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Administrative Assistant', aam$job_title, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Vendor Manager', aam$job_title, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+aam$industry <- ifelse(grepl('Program Manager', aam$job_title, ignore.case = TRUE), 'Business or Consulting', aam$industry)
+
+aam$industry <- ifelse(grepl('Government', aam$job_title, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Regulatory', aam$job_title, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+aam$industry <- ifelse(grepl('Compliance', aam$job_title, ignore.case = TRUE), 'Government and Public Administration', aam$industry)
+
+aam$industry <- ifelse(grepl('Biologist', aam$job_title, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('Chemist', aam$job_title, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('GIS Analyst', aam$job_title, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('Research', aam$job_title, ignore.case = TRUE), 'Science', aam$industry)
+aam$industry <- ifelse(grepl('Lab Assistant', aam$job_title, ignore.case = TRUE), 'Science', aam$industry)
+
+aam$industry <- ifelse(grepl('Credit', aam$job_title, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+aam$industry <- ifelse(grepl('Financ', aam$job_title, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+aam$industry <- ifelse(grepl('Accounting', aam$job_title, ignore.case = TRUE), 'Accounting, Banking & Finance', aam$industry)
+
+aam$industry <- ifelse(grepl('Customer Experience', aam$job_title, ignore.case = TRUE), 'Marketing, Advertising & PR', aam$industry)
+aam$industry <- ifelse(grepl('Account management', aam$job_title, ignore.case = TRUE), 'Marketing, Advertising & PR', aam$industry)
+aam$industry <- ifelse(grepl('Marketing', aam$job_title, ignore.case = TRUE), 'Marketing, Advertising & PR', aam$industry)
+aam$industry <- ifelse(grepl('Campaign and Program Manager', aam$job_title, ignore.case = TRUE), 'Marketing, Advertising & PR', aam$industry)
+
+aam$industry <- ifelse(grepl('UX Designer', aam$job_title, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Operations Manager', aam$job_title, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+aam$industry <- ifelse(grepl('Strategy', aam$job_title, ignore.case = TRUE), 'Engineering or Manufacturing', aam$industry)
+
+aam$industry <- ifelse(grepl('Real Estate', aam$job_title, ignore.case = TRUE), 'Sales', aam$industry)
+aam$industry <- ifelse(grepl('Customer Service', aam$job_title, ignore.case = TRUE), 'Sales', aam$industry)
+
+aam$industry <- ifelse(grepl('Inventory Specialist', aam$job_title, ignore.case = TRUE), 'Retail', aam$industry)
+aam$industry <- ifelse(grepl('Order Management Analyst', aam$job_title, ignore.case = TRUE), 'Retail', aam$industry)
+
+```
+
+
+#### Determine Woman Industries
+
+```{r Determine Woman Industries}
+
+tot_wom_perc <- 0.776
+
+tab_ind <- data.frame(table(aam$industry))
+tab_ind$Wom_Ind_Perc <- 0
+tab_ind$ind_dom <- "Not Woman"
+
+tab_wom_ind <- as.data.frame(table(aam$wom_notwom, aam$industry))
+
+for(i in 1:nrow(tab_ind)) 
+{ 
+    tot_freq = tab_ind[i, "Freq"]
+    wom_freq = tab_wom_ind[i*2, "Freq"]
+    wom_prec <- wom_freq / tot_freq
+    tab_ind[i, "Wom_Ind_Perc"] <- wom_prec
+    if (wom_prec > tot_wom_perc)
+    {
+        tab_ind[i, "ind_dom"] <- "Woman"
+    }
+}
+
+# Join dataframes to add industry dominance column
+
+names(tab_ind)[1] <- 'industry'
+tab_ind <- tab_ind %>% select(-c(Freq))
+
+aam <- aam %>% left_join(tab_ind, by = "industry")
+
+```
+
+#### Convert foreign currency to USD
+
+```{r Convert foreign currency to USD}
+
+# Combine salary and other compensation
+
+aam$total_comp = aam$salary + aam$oth_comp
+
+# Convert foreign money to USD: usd_salary and usd_oth_comp
+
+aam$usd_total_comp <- 0
+aam$usd_total_comp <- ifelse(aam$currency == "AUD", aam$total_comp*0.74, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "NZD", aam$total_comp*0.70, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "EUR", aam$total_comp*1.18, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "GBP", aam$total_comp*1.39, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "CAD", aam$total_comp*0.80, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "JPY", aam$total_comp*0.0091, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "SEK", aam$total_comp*0.12, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "CHF", aam$total_comp*1.09, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "NOK", aam$total_comp*0.11, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "MYR", aam$total_comp*0.24, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "MXN", aam$total_comp*0.050, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "ZAR", aam$total_comp*0.069, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "ARS", aam$total_comp*0.010, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "BDT", aam$total_comp*0.012, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "INR", aam$total_comp*0.013, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "PLN", aam$total_comp*0.26, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "DKK", aam$total_comp*0.16, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "TTD", aam$total_comp*0.15, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "NTD", aam$total_comp*0.036, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "CZK", aam$total_comp*0.046, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "HKD", aam$total_comp*0.13, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "CNY", aam$total_comp*0.15, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "BRL", aam$total_comp*0.20, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "SGD", aam$total_comp*0.74, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "ILS", aam$total_comp*0.30, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "LKR", aam$total_comp*0.0050, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "KRW", aam$total_comp*0.00088, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "THB", aam$total_comp*0.031, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "TRY", aam$total_comp*0.12, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "IDR", aam$total_comp*0.000069, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "PHP", aam$total_comp*0.020, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "SAR", aam$total_comp*0.27, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "COP", aam$total_comp*0.00026, aam$usd_total_comp)
+aam$usd_total_comp <- ifelse(aam$currency == "USD", aam$total_comp, aam$usd_total_comp)
+
+# Convert to thousands
+
+aam$usd_total_comp = aam$usd_total_comp / 1000
+
+```
+#### Remove unneeded columns
+
+```{r Remove unneeded columns}
+
+# Reorder and keep subset of columns
+
+aam = subset(aam, select = c(industry, country, gender, race, age, 
+                             education, prof_exp, field_exp, usd_total_comp, age_mid, 
+                             age_scale, prof_exp_mid, field_exp_mid, edu_num, edu_scale, 
+                             wht_notwht, wom_notwom, usa, ind_dom))
+
+# Save cleaned CSV file
+
+write.csv(aam,'clean_survey.csv', row.names = FALSE)
+
+```
