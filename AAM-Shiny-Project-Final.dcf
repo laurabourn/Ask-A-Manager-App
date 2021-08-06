@@ -1,0 +1,13 @@
+name: AAM-Shiny-Project-Final
+title: AAM-Shiny-Project-Final
+username:
+account: laurabourn
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 4452151
+bundleId: 4895987
+url: https://laurabourn.shinyapps.io/AAM-Shiny-Project-Final/
+when: 1628269640.29455
+lastSyncTime: 1628269640.29456
+asMultiple: FALSE
+asStatic: FALSE
